@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    name: safeimage-worker
+  name: safeimage-worker
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        name: safeimage-worker
+    spec:
+      containers:
+      - name: safeimage-worker
+        image: gcr.io/[PROJECT_ID]/safeimage-worker@[DIGEST]
+        tty: true
+        env:
+        - name: PROJECT_ID
+          value: "[PROJECT_ID]"

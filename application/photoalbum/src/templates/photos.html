@@ -1,0 +1,117 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Photo Album Example</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.4/angular-material.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body ng-app="myApp" ng-cloak style="background-color: #efefef" layout="column">
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <span>Photo Album Example</span>
+    </div>
+  </md-toolbar>
+
+  <md-content style="width:420px">
+    <md-card>
+      <md-card-content>
+        <p><em>The latest 10 photos are shown.</em></p>
+      </md-card-content>
+    </md-card>
+    <md-card>
+      <md-card-content>
+      <form method="post" action="/post" enctype="multipart/form-data">
+        <choose-file layout="row">
+          <input id="input_photo" name="input_photo" type="file" class="ng-hide">
+          <md-input-container flex class="md-block">
+            <input type="text" ng-model="fileName" disabled>
+            <div class="hint">Select your file (jpg, jpeg, png, gif)</div>
+          </md-input-container>
+          <md-button id="uploadButton" class="md-fab md-mini">
+            <md-icon class="material-icons">attach_file</md-icon>
+          </md-button>
+        </choose-file>
+        <md-card-actions>
+          <md-button class="md-accent md-raised" type="submit">Upload</md-button>
+        </md-card-actions>
+        <md-card-actions>
+          <md-button class="md-accent md-raised" onclick="location.href='photos'">Refresh</md-button>
+        </md-card-actions>
+      </form>
+      </md-card-content>
+    </md-card>
+    {% for photo in photos %}
+    <md-card>
+      <md-card-content>
+        <div layout="row" layout-align="space-between center">
+          <span>
+            {% if photo.has_thumbnail %}
+            <img src="{{ storage_path }}/thumbnails/{{ photo.filename }}" width="100" onclick="openImage('{{ storage_path }}/{{ photo.filename }}')">
+            </br>[{{ photo.label }}]
+            {% else %}
+            <img src="{{ storage_path }}/thumbnails/default.png" width="100" onclick="openImage('{{ storage_path }}/{{ photo.filename }}')">
+            </br>Thumbnail will appear soon.
+            {% endif %}
+          </span>
+          <form method=post action={{ url_for('delete') }} enctype="multipart/form-data">
+            <md-card-actions layout="row">
+              <md-button class="md-accent md-raised" type="submit" name="{{ photo.id }}">Delete</md-button>
+            </md-card-actions>
+          </form>
+        </div>
+      </md-card-content>
+    </md-card>
+    {% endfor %}
+  </md-content>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.4/angular-material.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.js"></script>
+
+  <script>
+    function openImage(url){ window.open(url, "imgwindow", "width=800,height=480"); }
+  </script>
+
+  <script>
+    var app = angular.module('myApp', ['ngMaterial']);
+    app.config(['$interpolateProvider', function($interpolateProvider) {
+      $interpolateProvider.startSymbol('{:');
+      $interpolateProvider.endSymbol(':}');
+    }]);
+    app.config(function($mdThemingProvider) {
+      $mdThemingProvider.theme('default')
+      .primaryPalette('blue-grey')
+      .accentPalette('orange');
+    });
+
+  app.directive('chooseFile', function() {
+    return {
+      link: function (scope, elem, attrs) {
+        var button = elem.find('button');
+        var input = angular.element(elem[0].querySelector('input#input_photo'));
+        button.bind('click', function() {
+          input[0].click();
+        });
+        input.bind('change', function(e) {
+          scope.$apply(function() {
+            var files = e.target.files;
+            if (files[0]) {
+              scope.fileName = files[0].name;
+            } else {
+              scope.fileName = null;
+            }
+          });
+        });
+      }
+    };
+  });
+  </script>
+  </body>
+</html>
