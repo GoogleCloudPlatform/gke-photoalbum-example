@@ -265,4 +265,4 @@ thumbnail-worker-86bd95cd68-kbhsn   2/2       Running   2          30m
 thumbnail-worker-86bd95cd68-n4rj7   2/2       Running   0          30m
 ```
 
-Test the feature using the sample file of a [violent picture](https://cdn.pixabay.com/photo/2015/09/21/14/24/zombie-949916_1280.jpg). (This is a picture of a zombie biting a human.) 
+Test the feature using the sample file of a [violent picture](https://pixabay.com/en/zombie-flesh-eater-dead-spooky-949916/). (This is a picture of a zombie biting a human.) 
