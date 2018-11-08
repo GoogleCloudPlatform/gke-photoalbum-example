@@ -156,14 +156,14 @@ Modify the config file `config/thumbnail-deployment.yaml`.
 You can copy-and-paste the following commands to apply these modifications.
 
 ```
-project_id=$(gcloud config list project --format "value(core.project)")
+PROJECT_ID=$(gcloud config list project --format "value(core.project)")
 connection_name=$(gcloud sql instances describe photoalbum-db --format "value(connectionName)")
 
 digest_photoalbum=$(gcloud container images describe gcr.io/$PROJECT_ID/photoalbum-app:latest --format "value(image_summary.digest)")
-sed -i.bak "s/\[PROJECT_ID\]/$project_id/;s/\[CONNECTION_NAME\]/$connection_name/;s/\[DIGEST\]/$digest_photoalbum/" config/photoalbum-deployment.yaml
+sed -i.bak "s/\[PROJECT_ID\]/$PROJECT_ID/;s/\[CONNECTION_NAME\]/$connection_name/;s/\[DIGEST\]/$digest_photoalbum/" config/photoalbum-deployment.yaml
 
 digest_thumbnail=$(gcloud container images describe gcr.io/$PROJECT_ID/thumbnail-worker:latest --format "value(image_summary.digest)")
-sed -i.bak "s/\[PROJECT_ID\]/$project_id/;s/\[CONNECTION_NAME\]/$connection_name/;s/\[DIGEST\]/$digest_thumbnail/" config/thumbnail-deployment.yaml
+sed -i.bak "s/\[PROJECT_ID\]/$PROJECT_ID/;s/\[CONNECTION_NAME\]/$connection_name/;s/\[DIGEST\]/$digest_thumbnail/" config/thumbnail-deployment.yaml
 ```
 
 Create GKE resources.
@@ -239,9 +239,8 @@ Modify the config file `config/safeimage-deployment.yaml`.
 You can copy-and-paste the following commands to apply these modifications.
 
 ```
-project_id=$(gcloud config list project --format "value(core.project)")
 digest_safeimage=$(gcloud container images describe gcr.io/$PROJECT_ID/safeimage-worker:latest --format "value(image_summary.digest)")
-sed -i.bak "s/\[PROJECT_ID\]/$project_id/;s/\[CONNECTION_NAME\]/$connection_name/;s/\[DIGEST\]/$digest_safeimage/" config/safeimage-deployment.yaml
+sed -i.bak "s/\[PROJECT_ID\]/$PROJECT_ID/;s/\[CONNECTION_NAME\]/$connection_name/;s/\[DIGEST\]/$digest_safeimage/" config/safeimage-deployment.yaml
 ```
 
 Create a deployment resource to roll out Safeimage service.
