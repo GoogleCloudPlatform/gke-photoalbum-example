@@ -72,7 +72,7 @@ def validate_image(filename):
   response = vision_client.safe_search_detection(image=image)
   safe = response.safe_search_annotation
   print('Detected levels: {}'.format((safe.adult, safe.violence)))
-  if safe.adult >= 3 or safe.violence >= 3:
+  if safe.adult >= 3 or safe.violence >= 2:
     blur_image(filename)
 
 
