@@ -7,6 +7,7 @@ RUN apt-get -qq update; \
     apt-get -qq -y install python python-dev python-pip \
         python-flask python-requests python-wtforms python-arrow \
         python-flask-sqlalchemy python-pymysql python-flaskext.wtf
+RUN pip install --upgrade pip
 RUN pip install --upgrade setuptools \
         google-cloud==0.34.0 google-auth-httplib2==0.0.3 \
         google-cloud-storage==1.13.0 google-cloud-pubsub==0.38.0
