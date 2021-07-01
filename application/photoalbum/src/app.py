@@ -43,7 +43,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = \
 db = SQLAlchemy(app)
 bucket_name = '{}-photostore'.format(project_id)
 bucket = storage.Client().get_bucket(bucket_name)
-storage_path = 'https://storage.cloud.google.com/{}'.format(bucket_name)
+storage_path = 'https://storage.googleapis.com/{}'.format(bucket_name)
 
 
 content_types = {'jpg': 'image/jpeg', 'jpeg': 'image/jpeg',
