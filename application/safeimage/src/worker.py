@@ -76,7 +76,7 @@ def callback(message):
     data = message.data.decode('utf-8')
     attributes = message.attributes
     message.ack()
-    if attributes['eventType'] != 'OBJECT_FINALIZE':
+    if attributes['eventType'] != 'OBJECT_FINALIZE' or 'overwroteGeneration' in attributes:
       return
     object_metadata = json.loads(data)
     filename = object_metadata['name']
