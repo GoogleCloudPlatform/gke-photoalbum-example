@@ -41,6 +41,7 @@ subscription_path = subscriber.subscription_path(
 
 def blur_image(filename):
   bucket = storage.Client().get_bucket(bucket_name)
+  logger.info('Blurring an image: {}'.format(filename))
   with tempfile.NamedTemporaryFile() as temp:
     blob = bucket.blob(filename)
     blob.download_to_filename(temp.name)
@@ -53,20 +54,24 @@ def blur_image(filename):
     blob = bucket.blob(filename)
     blob.upload_from_filename(temp_filename, content_type=content_type)
     blob.make_public()
+    logger.info('Blurred an image: {}'.format(filename))
 
 
 def validate_image(filename):
+  logger = logging.getLogger(__name__)
   vision_client = vision.ImageAnnotatorClient()
   image = vision.Image()
   image.source.image_uri = 'gs://{}/{}'.format(bucket_name, filename)
+  logger.info('Detecting levels: {}'.format(filename))
   response = vision_client.safe_search_detection(image=image)
   safe = response.safe_search_annotation
-  print('Detected levels: {}'.format((safe.adult, safe.violence)))
+  logger.info('Detected levels for {}: {}'.format(filename, (safe.adult, safe.violence)))
   if safe.adult >= 3 or safe.violence >= 2:
     blur_image(filename)
 
 
 def callback(message):
+  logger = logging.getLogger(__name__)
   try:
     data = message.data.decode('utf-8')
     attributes = message.attributes
@@ -75,15 +80,34 @@ def callback(message):
       return
     object_metadata = json.loads(data)
     filename = object_metadata['name']
-    print('Process file: {}'.format(filename))
+    logger.info('Processing a file: {}'.format(filename))
     validate_image(filename)
+    logger.info('Processed a file: {}'.format(filename))
   except Exception as e:
-    print('Something wrong happened: {}'.format(e.args))
+    logger.error('Something wrong happened: {}'.format(e.args))
 
+
+def setup_logger():
+  logger = logging.getLogger(__name__)
+  logger.propagate = False
+  stdout_handler = logging.StreamHandler(sys.stdout)
+  stdout_handler.setLevel(logging.DEBUG)
+  stdout_handler.addFilter(lambda r: r.levelno < logging.WARNING)
+  logger.addHandler(stdout_handler)
+
+  stderr_handler = logging.StreamHandler(sys.stderr)
+  stderr_handler.setLevel(logging.DEBUG)
+  stderr_handler.addFilter(lambda r: r.levelno >= logging.WARNING)
+  logger.addHandler(stderr_handler)
+  logger.setLevel(logging.DEBUG)
+
+
+setup_logger()
 
 streaming_pull_future = subscriber.subscribe(
   subscription_path, callback=callback)
-print('Waiting for messages on {}'.format(subscription_path))
+logger = logging.getLogger(__name__)
+logger.info('Waiting for messages on {}'.format(subscription_path))
 
 with subscriber:
   try:
