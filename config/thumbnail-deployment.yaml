@@ -17,7 +17,6 @@ spec:
       containers:
       - name: thumbnail-worker
         image: gcr.io/[PROJECT_ID]/thumbnail-worker@[DIGEST]
-        tty: true
         env:
         - name: PROJECT_ID
           value: "[PROJECT_ID]"
