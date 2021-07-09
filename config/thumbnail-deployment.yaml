@@ -25,7 +25,7 @@ spec:
         - name: DB_PASS
           value: "pas4appuser"
       - name: cloudsql-proxy
-        image: gcr.io/cloudsql-docker/gce-proxy:1.11
+        image: gcr.io/cloudsql-docker/gce-proxy:1.23.0
         command: ["/cloud_sql_proxy",
                   "-instances=[CONNECTION_NAME]=tcp:3306"]
         securityContext:
