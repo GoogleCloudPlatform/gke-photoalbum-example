@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # Copyright 2018 Google LLC
@@ -16,15 +16,16 @@
 # limitations under the License.
 
 
+import logging
 import os
+import sys
 import tempfile
-import time
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from PIL import Image
 
-from google.cloud import pubsub, storage, vision
+from google.cloud import pubsub_v1, storage, vision
 
 
 project_id = os.environ['PROJECT_ID']
@@ -41,7 +42,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = \
     'mysql+pymysql://{}:{}@localhost:3306/photo_db'.format(dbuser, dbpass)
 db = SQLAlchemy(app)
 
-subscriber = pubsub.SubscriberClient()
+subscriber = pubsub_v1.SubscriberClient()
 subscription_path = subscriber.subscription_path(
     project_id, subscription_name)
 
@@ -78,7 +79,7 @@ def create_thumbnail(filename):
 
 def update_db(filename):
   vision_client = vision.ImageAnnotatorClient()
-  image = vision.types.Image()
+  image = vision.Image()
   image.source.image_uri = 'gs://{}/{}'.format(bucket_name, filename)
   response = vision_client.label_detection(image=image, max_results=3)
 
@@ -91,16 +92,21 @@ def update_db(filename):
 
 def callback(message):
   try:
-    filename = message.data
-    print('Process file: {}'.format(filename))
+    filename = message.data.decode()
     message.ack()
     create_thumbnail(filename)
     update_db(filename)
   except Exception as e:
-    print('Something worng happened: {}'.format(e.args))
+    print('Something wrong happened: {}'.format(e.args))
 
 
-subscriber.subscribe(subscription_path, callback=callback)
-print('Waiting for messages on {}'.format(subscription_path))
-while True:
-  time.sleep(60)
+streaming_pull_future = subscriber.subscribe(
+  subscription_path, callback=callback)
+
+with subscriber:
+  try:
+    streaming_pull_future.result()
+  except TimeoutError:
+    streaming_pull_future.cancel()
+    streaming_pull_future.result()
+
