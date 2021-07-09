@@ -17,7 +17,6 @@ spec:
       containers:
       - name: thumbnail-worker
         image: gcr.io/[PROJECT_ID]/thumbnail-worker@[DIGEST]
-        tty: true
         env:
         - name: PROJECT_ID
           value: "[PROJECT_ID]"
@@ -26,7 +25,7 @@ spec:
         - name: DB_PASS
           value: "pas4appuser"
       - name: cloudsql-proxy
-        image: gcr.io/cloudsql-docker/gce-proxy:1.11
+        image: gcr.io/cloudsql-docker/gce-proxy:1.23.0
         command: ["/cloud_sql_proxy",
                   "-instances=[CONNECTION_NAME]=tcp:3306"]
         securityContext:

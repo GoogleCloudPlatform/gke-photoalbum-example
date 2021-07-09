@@ -1,15 +1,15 @@
-FROM debian:9.5
+FROM marketplace.gcr.io/google/debian10
 LABEL maintainer "Etsuji Nakai"
-ENV REFRESHED_AT 2018/10/13
+ENV REFRESHED_AT 2021/07/07
 
-RUN apt-get -qq update; \
-    apt-get -qq -y upgrade; \
-    apt-get -qq -y install python python-dev python-pip
-RUN pip install --upgrade pip
-RUN pip install --upgrade setuptools pillow \
-        google-cloud==0.34.0 google-auth-httplib2==0.0.3 \
-        google-cloud-storage==1.13.0 google-cloud-pubsub==0.38.0 \
-        google-cloud-vision==0.34.0
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y python3 python3-dev wget
+RUN wget https://bootstrap.pypa.io/get-pip.py
+RUN python3 get-pip.py
+
+RUN pip install --upgrade google-cloud-core==1.7.1 \
+	google-cloud-pubsub==2.6.0 google-cloud-storage==1.40.0 \
+	google-cloud-vision==2.3.2 Pillow==8.3.1
 
 ADD src /opt/safeimage/bin
 RUN chmod u+x /opt/safeimage/bin/worker.py

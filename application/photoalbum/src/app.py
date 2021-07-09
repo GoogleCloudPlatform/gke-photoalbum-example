@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # Copyright 2018 Google LLC
@@ -29,7 +29,7 @@ from werkzeug.datastructures import CombinedMultiDict
 from werkzeug.utils import secure_filename
 from wtforms import Form, ValidationError
 
-from google.cloud import storage, pubsub
+from google.cloud import storage, pubsub_v1
 
 
 project_id = os.environ['PROJECT_ID']
@@ -40,6 +40,7 @@ dbpass = os.environ['DB_PASS']
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = \
     'mysql+pymysql://{}:{}@localhost:3306/photo_db'.format(dbuser, dbpass)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 bucket_name = '{}-photostore'.format(project_id)
 bucket = storage.Client().get_bucket(bucket_name)
@@ -73,9 +74,9 @@ db.create_all()
 
 
 def publish_message(topic_name, data):
-  publisher = pubsub.PublisherClient()
+  publisher = pubsub_v1.PublisherClient()
   topic_path = publisher.topic_path(project_id, topic_name)
-  publisher.publish(topic_path, str(data))
+  publisher.publish(topic_path, data.encode('utf-8'))
 
 
 def is_photo():
@@ -132,7 +133,7 @@ def post():
 
 @app.route('/delete', methods=['POST'])
 def delete():
-  photo_id = request.form.keys()[0]
+  photo_id = list(request.form.keys())[0]
   photo = db.session.query(Photo).filter_by(id=photo_id).first()
   bucket.delete_blobs(
       [photo.filename, 'thumbnails/{}'.format(photo.filename)],
