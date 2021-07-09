@@ -40,6 +40,7 @@ dbpass = os.environ['DB_PASS']
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = \
     'mysql+pymysql://{}:{}@localhost:3306/photo_db'.format(dbuser, dbpass)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 bucket_name = '{}-photostore'.format(project_id)
 bucket = storage.Client().get_bucket(bucket_name)

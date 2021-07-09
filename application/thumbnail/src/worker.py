@@ -40,6 +40,7 @@ content_types = {'jpg': 'image/jpeg', 'jpeg': 'image/jpeg',
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = \
     'mysql+pymysql://{}:{}@localhost:3306/photo_db'.format(dbuser, dbpass)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 subscriber = pubsub_v1.SubscriberClient()
