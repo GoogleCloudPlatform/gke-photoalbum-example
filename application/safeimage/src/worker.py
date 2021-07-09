@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # Copyright 2018 Google LLC
@@ -17,45 +17,36 @@
 
 
 import json
+import logging
 import os
+import sys
 import tempfile
-import time
 
 from PIL import Image, ImageFilter
 
-from google.cloud import pubsub, storage, vision
+from google.cloud import pubsub_v1, storage, vision
 
 
 project_id = os.environ['PROJECT_ID']
-
 
 subscription_name = 'safeimage-workers'
 bucket_name = '{}-photostore'.format(project_id)
 content_types = {'jpg': 'image/jpeg', 'jpeg': 'image/jpeg',
                  'png': 'image/png', 'gif': 'image/gif'}
 
-
-subscriber = pubsub.SubscriberClient()
+subscriber = pubsub_v1.SubscriberClient()
 subscription_path = subscriber.subscription_path(
     project_id, subscription_name)
 
 
 def blur_image(filename):
   bucket = storage.Client().get_bucket(bucket_name)
-
   with tempfile.NamedTemporaryFile() as temp:
     blob = bucket.blob(filename)
     blob.download_to_filename(temp.name)
     im = Image.open(temp.name)
     im = im.filter(ImageFilter.GaussianBlur(16))
-#    if min(im.size) < 256:
-#      im = im.filter(ImageFilter.GaussianBlur(8))
-#      im = im.resize([x // 16 for x in im.size]).resize(im.size)
-#    else:
-#      im = im.filter(ImageFilter.GaussianBlur(16))
-#      im = im.resize([x // 32 for x in im.size]).resize(im.size)
     extention = filename.split('.')[-1].lower()
-
     temp_filename = '{}.{}'.format(temp.name, extention)
     im.save(temp_filename)
     content_type = content_types[extention]
@@ -66,8 +57,7 @@ def blur_image(filename):
 
 def validate_image(filename):
   vision_client = vision.ImageAnnotatorClient()
-  image = vision.types.Image()
-
+  image = vision.Image()
   image.source.image_uri = 'gs://{}/{}'.format(bucket_name, filename)
   response = vision_client.safe_search_detection(image=image)
   safe = response.safe_search_annotation
@@ -88,10 +78,16 @@ def callback(message):
     print('Process file: {}'.format(filename))
     validate_image(filename)
   except Exception as e:
-    print('Something worng happened: {}'.format(e.args))
+    print('Something wrong happened: {}'.format(e.args))
 
 
-subscriber.subscribe(subscription_path, callback=callback)
+streaming_pull_future = subscriber.subscribe(
+  subscription_path, callback=callback)
 print('Waiting for messages on {}'.format(subscription_path))
-while True:
-  time.sleep(60)
+
+with subscriber:
+  try:
+    streaming_pull_future.result()
+  except TimeoutError:
+    streaming_pull_future.cancel()
+    streaming_pull_future.result()
