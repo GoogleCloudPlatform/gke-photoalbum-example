@@ -9,8 +9,8 @@ RUN python3 get-pip.py
 
 RUN pip install --upgrade google-cloud-core==1.7.1 \
 	google-cloud-pubsub==2.6.0 google-cloud-storage==1.40.0 \
-	google-cloud-vision==2.3.2 Flask==2.0.1 Flask-SQLAlchemy==2.5.1 \
-	Pillow==8.3.1 PyMySQL==1.0.2
+	google-cloud-vision==2.3.2 Flask==2.2.3 Flask-SQLAlchemy==3.0.3 \
+	Pillow==8.3.1 PyMySQL==1.0.2 pytz==2022.7.1
 
 ADD src /opt/thumbnail/bin
 RUN chmod u+x /opt/thumbnail/bin/worker.py
