@@ -33,7 +33,7 @@ to implement asynchronous service calls for applications running on GKE.
  [the API Manager][9]
 
 - Kubernetes Engine API
-- Cloud SQL Admin API
+- SQL Admin API
 - Cloud Build API
 - Cloud Vision API
 
@@ -97,8 +97,10 @@ Connect to the CloudSQL instance from the Cloud Shell and create database `photo
 ```
 gcloud sql connect photoalbum-db --user=root --quiet
 
-create database photo_db;
-grant all privileges on photo_db.* to appuser@"%" identified by 'pas4appuser' with grant option;
+CREATE DATABASE photo_db;
+CREATE USER 'appuser'@'%' IDENTIFIED BY 'pas4appuser';
+GRANT ALL ON photo_db.* TO 'appuser'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
 exit
 ```
 
@@ -114,6 +116,7 @@ gcloud pubsub subscriptions create --topic thumbnail-service thumbnail-workers
 - Set cluster name as `photoalbum-cluster`.
 - Set Number of nodes as `5`.
 - Set Access scopes as "Allow full access to all Cloud APIs".
+- Set Zone as `us-central1-a`
 - Others can be left as default.
 
 ### Build Container Images
