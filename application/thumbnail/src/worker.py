@@ -41,6 +41,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = \
     'mysql+pymysql://{}:{}@localhost:3306/photo_db'.format(dbuser, dbpass)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.app_context().push()
 db = SQLAlchemy(app)
 
 subscriber = pubsub_v1.SubscriberClient()
@@ -107,10 +108,11 @@ def update_db(filename):
     filename, ', '.join(labels)))
 
   logger.info('Updating the database: {}'.format(filename))
-  photo = db.session.query(Photo).filter_by(filename=filename).first()
-  photo.label = ', '.join(labels)
-  photo.has_thumbnail = True
-  db.session.commit()
+  with app.app_context():
+    photo = db.session.query(Photo).filter_by(filename=filename).first()
+    photo.label = ', '.join(labels)
+    photo.has_thumbnail = True
+    db.session.commit()
   logger.info('Updated the database: {}'.format(filename))
 
 

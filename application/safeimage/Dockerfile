@@ -9,7 +9,7 @@ RUN python3 get-pip.py
 
 RUN pip install --upgrade google-cloud-core==1.7.1 \
 	google-cloud-pubsub==2.6.0 google-cloud-storage==1.40.0 \
-	google-cloud-vision==2.3.2 Pillow==8.3.1
+	google-cloud-vision==2.3.2 Pillow==8.3.1 pytz==2022.7.1
 
 ADD src /opt/safeimage/bin
 RUN chmod u+x /opt/safeimage/bin/worker.py
