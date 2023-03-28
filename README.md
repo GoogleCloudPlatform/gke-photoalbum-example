@@ -33,7 +33,7 @@ to implement asynchronous service calls for applications running on GKE.
  [the API Manager][9]
 
 - Kubernetes Engine API
-- SQL Admin API
+- Cloud SQL Admin API
 - Cloud Build API
 - Cloud Vision API
 
