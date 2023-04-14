@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: safeimage-worker
-        image: gcr.io/[PROJECT_ID]/safeimage-worker@[DIGEST]
+        image: us-central1-docker.pkg.dev/[PROJECT_ID]/photoalbum-repo/safeimage-worker@[DIGEST]
         env:
         - name: PROJECT_ID
           value: "[PROJECT_ID]"

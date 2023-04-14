@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: thumbnail-worker
-        image: gcr.io/[PROJECT_ID]/thumbnail-worker@[DIGEST]
+        image: us-central1-docker.pkg.dev/[PROJECT_ID]/photoalbum-repo/thumbnail-worker@[DIGEST]
         env:
         - name: PROJECT_ID
           value: "[PROJECT_ID]"
