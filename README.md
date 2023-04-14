@@ -36,6 +36,7 @@ to implement asynchronous service calls for applications running on GKE.
 - Cloud SQL Admin API
 - Cloud Build API
 - Cloud Vision API
+- Artifact Registry API
 
 [8]: https://console.developers.google.com/project
 [9]: https://console.developers.google.com
@@ -119,6 +120,12 @@ gcloud pubsub subscriptions create --topic thumbnail-service thumbnail-workers
 - Set Zone as `us-central1-a`
 - Others can be left as default.
 
+### Create Artifact Registry Repository
+
+```
+gcloud artifacts repositories create photoalbum-repo --repository-format=docker --location=us-central1 --description="Docker repository"
+```
+
 ### Build Container Images
 
 This application has a simple user authentication mechanism. You can change the username and password by modifying the following part in `application/photoalbum/src/auth_decorator.py`.
@@ -132,15 +139,15 @@ Build container images using Cloud Build.
 
 ```
 export PROJECT_ID=$(gcloud config list project --format "value(core.project)")
-gcloud builds submit ./application/photoalbum -t gcr.io/$PROJECT_ID/photoalbum-app
-gcloud builds submit ./application/thumbnail -t gcr.io/$PROJECT_ID/thumbnail-worker
+gcloud builds submit ./application/photoalbum -t us-central1-docker.pkg.dev/$PROJECT_ID/photoalbum-repo/photoalbum-app
+gcloud builds submit ./application/thumbnail -t us-central1-docker.pkg.dev/$PROJECT_ID/photoalbum-repo/thumbnail-worker
 ```
 
 Check image digests.
 
 ```
-gcloud container images describe gcr.io/$PROJECT_ID/photoalbum-app:latest --format "value(image_summary.digest)"
-gcloud container images describe gcr.io/$PROJECT_ID/thumbnail-worker:latest --format "value(image_summary.digest)"
+gcloud container images describe us-central1-docker.pkg.dev/$PROJECT_ID/photoalbum-repo/photoalbum-app:latest --format "value(image_summary.digest)"
+gcloud container images describe us-central1-docker.pkg.dev/$PROJECT_ID/photoalbum-repo/thumbnail-worker:latest --format "value(image_summary.digest)"
 ```
 
 ### Deploy Application
@@ -162,10 +169,10 @@ You can copy-and-paste the following commands to apply these modifications.
 PROJECT_ID=$(gcloud config list project --format "value(core.project)")
 connection_name=$(gcloud sql instances describe photoalbum-db --format "value(connectionName)")
 
-digest_photoalbum=$(gcloud container images describe gcr.io/$PROJECT_ID/photoalbum-app:latest --format "value(image_summary.digest)")
+digest_photoalbum=$(gcloud container images describe us-central1-docker.pkg.dev/$PROJECT_ID/photoalbum-repo/photoalbum-app:latest --format "value(image_summary.digest)")
 sed -i.bak "s/\[PROJECT_ID\]/$PROJECT_ID/;s/\[CONNECTION_NAME\]/$connection_name/;s/\[DIGEST\]/$digest_photoalbum/" config/photoalbum-deployment.yaml
 
-digest_thumbnail=$(gcloud container images describe gcr.io/$PROJECT_ID/thumbnail-worker:latest --format "value(image_summary.digest)")
+digest_thumbnail=$(gcloud container images describe us-central1-docker.pkg.dev/$PROJECT_ID/photoalbum-repo/thumbnail-worker:latest --format "value(image_summary.digest)")
 sed -i.bak "s/\[PROJECT_ID\]/$PROJECT_ID/;s/\[CONNECTION_NAME\]/$connection_name/;s/\[DIGEST\]/$digest_thumbnail/" config/thumbnail-deployment.yaml
 ```
 
@@ -223,13 +230,13 @@ Build a container image using Cloud Build.
 
 ```
 export PROJECT_ID=$(gcloud config list project --format "value(core.project)")
-gcloud builds submit ./application/safeimage -t gcr.io/$PROJECT_ID/safeimage-worker
+gcloud builds submit ./application/safeimage -t us-central1-docker.pkg.dev/$PROJECT_ID/photoalbum-repo/safeimage-worker
 ```
 
 Check an image digest.
 
 ```
-gcloud container images describe gcr.io/$PROJECT_ID/safeimage-worker:latest --format "value(image_summary.digest)"
+gcloud container images describe us-central1-docker.pkg.dev/$PROJECT_ID/photoalbum-repo/safeimage-worker:latest --format "value(image_summary.digest)"
 ```
 
 ### Deploy application
@@ -242,7 +249,7 @@ Modify the config file `config/safeimage-deployment.yaml`.
 You can copy-and-paste the following commands to apply these modifications.
 
 ```
-digest_safeimage=$(gcloud container images describe gcr.io/$PROJECT_ID/safeimage-worker:latest --format "value(image_summary.digest)")
+digest_safeimage=$(gcloud container images describe us-central1-docker.pkg.dev/$PROJECT_ID/photoalbum-repo/safeimage-worker:latest --format "value(image_summary.digest)")
 sed -i.bak "s/\[PROJECT_ID\]/$PROJECT_ID/;s/\[CONNECTION_NAME\]/$connection_name/;s/\[DIGEST\]/$digest_safeimage/" config/safeimage-deployment.yaml
 ```
 
