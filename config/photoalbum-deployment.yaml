@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: photoalbum-app
-        image: gcr.io/[PROJECT_ID]/photoalbum-app@[DIGEST]
+        image: us-central1-docker.pkg.dev/[PROJECT_ID]/photoalbum-repo/photoalbum-app@[DIGEST]
         tty: true
         ports:
         - containerPort: 8080
